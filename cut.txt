@@ -1,0 +1,7 @@
+DP3SUK
+read problem gcut1_3d
+length: 250 width: 250 height: 250
+Stage 1 7 Depth cuts at 86 118 140 141 148 152 160
+250
+Stage 2 8 Horizontal cuts at 69 83 114 138 143 152 166 167
+250
