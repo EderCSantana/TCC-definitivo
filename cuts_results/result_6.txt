@@ -1,6 +1,0 @@
-DP3SUK
-read problem 'large-2-box'(24.000x12.000x3.000, max_weight:70.000) vol(864.000)
-length: 24 width: 12 height: 3 
-Stage 1 4 Depth cuts at 2 4 6 8 
-12
-3

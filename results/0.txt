@@ -1,3 +1,0 @@
-0
-12 6 0 10
-'small-envelope'(12.000x6.000x0.000, max_weight:10.000) vol(0.000)
