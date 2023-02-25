@@ -1,0 +1,3 @@
+0
+9 5 2 70
+'large-envelope'(15.000x12.000x1.000, max_weight:15.000) vol(180.000)

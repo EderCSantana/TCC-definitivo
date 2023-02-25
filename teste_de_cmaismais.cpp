@@ -9,6 +9,21 @@ std::vector<int> DDP(
     int D,
     const std::vector<int> &d)
 {
+
+       /*
+    Algorithm 2.2 DDP
+    Input: D, d1, . . ., dm.
+    Output: a set P of discretization points.
+    P = {0}.
+    For j = 0 to D do cj = 0.
+    For i = 1 to m do
+    For j = di to D
+    If cj < cj-di + di then cj = cj-di + di.
+    For j = 1 to D
+    If c
+    j = j then P = P ? {j}.
+    Return P.
+    */
     std::vector<int> P; // calculated discretization points
 
     std::vector<int> c(D + 1);
@@ -28,6 +43,8 @@ std::vector<int> DDP(
     }
     return P;
 }
+
+/// cut orientation codes
 enum class eCut
 {
     nil,
@@ -82,16 +99,30 @@ public:
         myLocH = space.myLocH;
     }
 };
+
+// A vector of items
 typedef std::vector<cItem> itemv_t;
+
+/** discretization points ( (positions where guillotine cutting can be performed)
+    @param[in] D knapsack capacity
+    @param[in] d vector of item weights
+    Implemented from the psuedo code in Cintra GF, Miyazawa FK, Wakabayashi Y, Xavier EC. Algorithms for twodimensional cutting stock and strip packing problems using dynamic programming and column generation. European Journal of Operational Research
+2008;191:59–83
+In what follows we describe the algorithm DDP. The basic idea of this algorithm is to solve
+a knapsack problem in which every item i has weight and value di (i = 1, . . . , m), and the
+knapsack has capacity D. The well-known dynamic programming technique for the knapsack
+problem (see [23]) finds optimal values of knapsacks with (integer) capacities taking values from
+1 to D. It is easy to see that j is a discretization point if and only if the knapsack with capacity
+j has optimal value j.
+ I am not clear on what constitues an "optimal knapsack".  It looks like one that can contain a subset of
+ items, and possibly duplicate items, without wasted space.  However the knapsack that can carry
+ every item is excluded.
+*/
 std::vector<int> DDP(
     int D,
     const std::vector<int> &d);
-std::vector<int> RRP(
-    int D,
-    const std::vector<int> &d);
-bool RK2FFG(
-    itemv_t &level,
-    const std::vector<int> &bin);
+
+/// A problem instance
 struct sInstance
 {
     std::vector<int> bin;
@@ -102,6 +133,12 @@ struct sInstance
     std::vector<int> item_values;
     std::string myName;
     int stageCount; // the number of stages
+
+     /* read problem instance
+            #param[in] fname path to file
+        The file format is described
+        http://www.loco.ic.unicamp.br/files/instances/3duk/
+    */
     void read(const std::string &fname);
     std::string text();
 };
@@ -119,11 +156,8 @@ struct sPattern
     std::string textCuts(int stage, eCut cut) const;
 };
 
-sPattern DP3UK(
-    sInstance &problem);
+
 sPattern DPS3UK(
-    sInstance &problem);
-sPattern H3CS(
     sInstance &problem);
 std::vector<int>
 ParseSpaceDelimited(
@@ -343,7 +377,7 @@ sPattern DPS3UK(
     int s = Qhat.size();
     int u = Rhat.size();
 
-     // set up some 3D vectors for storing results
+     // set up some vectors for storing results
     std::vector<int> G1(u, 0);
     std::vector<std::vector<int>> G2(s, G1);
     std::vector<std::vector<std::vector<int>>> G3(m, G2);
@@ -351,6 +385,8 @@ sPattern DPS3UK(
     v4d_t item(m, G3); // the item at this location
     v4d_t guil(m, G3); // the cut orientation
     v4d_t pos(m, G3);  // the cut position
+
+        //pseudocode lines 2.3 to 2.8
     for (int ilength = 0; ilength < m; ilength++)
     {
         for (int iwidth = 0; iwidth < s; iwidth++)
@@ -526,12 +562,15 @@ int main(int argc, char *argv[])
         std::cout << "Usage: DP3SUKInstance data/thpack/thpack1\n";
         exit(1);
     }
-
+    // read the instance file
     sInstance problem;
     problem.read(argv[1]);
     problem.stageCount = 3;
+
+        // run the algorithm
     auto P = DPS3UK(problem);
 
+    // display the solution
     std::cout << P.text() << "\n";
 
     return 0;

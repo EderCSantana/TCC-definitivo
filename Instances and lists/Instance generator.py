@@ -19,9 +19,9 @@ def generate_new_csv(input_file, output_file_prefix, n, max_rows):
                     writer.writerow(row)
 
 
-input_file = 'original.csv'
-output_file_prefix = 'item'
-max_rows = 10
+input_file = 'Instances and lists\All Boxes List.csv'
+output_file_prefix = 'box'
+max_rows = 3
 
 n = int(input("Enter the number of new CSV files to generate: "))
 
