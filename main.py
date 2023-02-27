@@ -57,6 +57,7 @@ def extract_dimensions(stringP):
 
 """
 @function write_results_to_files
+Save the txt documents with the results of the knapsack code 
 """
 def write_results_to_files():
     os.makedirs(path2, exist_ok=True)
@@ -67,6 +68,11 @@ def write_results_to_files():
         with open(path2 + f"/result_{i}.txt", "w") as f:
             f.write(result)
 
+
+"""
+@function read_file_lines
+Gets the path of a file and organize their lines in a vector
+"""
 def read_file_lines(file_path):
     with open(file_path) as file:
         lines = file.readlines()
@@ -76,6 +82,11 @@ def read_file_lines(file_path):
         line_lists[i] = line.strip().split(" ")
     return line_lists
 
+
+"""
+@function create_folder
+If there's no folder named cuts_of_order, it creates one and return it's directory
+"""
 def create_folder():
     current_dir = os.getcwd()
     cuts_of_order_dir = os.path.join(current_dir, "cuts_of_order")
@@ -83,44 +94,128 @@ def create_folder():
         os.mkdir(cuts_of_order_dir)
     return cuts_of_order_dir
 
+
+"""
+@function print_vector_elements
+Prints the elements of a vector starting after 6 positions
+"""
 def print_vector_elements(vector, n):
     for i in range(n):
         print(vector[i + 6])
 
-# turtle stuff starts here
 
-def cuts_in_x(vector, t):
+"""
+@function create_folder
+Create a folder with the name 'cuts_of_order' in the current working directory
+"""
+def create_folder():
+    folder_name = 'cuts_of_order'
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+    return folder_name
+
+def draw_borders(x, y, t, scale_factor, width, height):
+    last_x = int(x[-1]) * scale_factor
+    last_y = int(y[-1]) * scale_factor
+    
+    t.penup()
+    t.goto(0, 0)
+    t.pendown()
+    t.goto(0, last_y)
+    
+    t.penup()
+    t.goto(0, last_y)
+    t.pendown()
+    t.goto(last_x, last_y)
+    
+    t.penup()
+    t.goto(last_x, last_y)
+    t.pendown()
+    t.goto(last_x, 0)
+    
+    t.penup()
+    t.goto(last_x, 0)
+    t.pendown()
+    t.goto(0, 0)
+    
+    
+
+
+"""
+@function 
+Gets a vector and a parameter for turtle and draws straigt lines on x-axis
+"""
+def cuts_in_x(vector, t, scale_factor, width, height):
     for i in vector:
+        x = int(i) * scale_factor
+        y0 = 0
+        y1 = int(vector[-1]) * scale_factor
+        
         t.penup()
-        t.goto(int(i)*size_corrector, 0*size_corrector)
+        t.goto(x, y0)
         t.pendown()
-        t.goto(int(i)*size_corrector, int(vector[-1])*size_corrector)
+        t.goto(x, y1)
+        t.write(int(i))
+
+
+        
+"""
+@function 
+Gets a vector and a parameter for turtle and draws straigt lines on x-asis
+"""
+def cuts_in_y(vector, t, scale_factor, width, height):
+    for i in vector:
+        x0 = 0
+        x1 = int(vector[-1]) * scale_factor
+        y = int(i) * scale_factor
+        
+        t.penup()
+        t.goto(x0, y)
+        t.pendown()
+        t.goto(x1, y)
         t.write(int(i))
         
-
-def cuts_in_y(vector, t):
-    for i in vector:
-        t.penup()
-        t.goto(0*size_corrector, int(i)*size_corrector)
-        t.pendown()
-        t.goto(int(vector[-1])*size_corrector, int(i)*size_corrector)
-        t.write(int(i))
+            
         
+"""
+@function cut_in_directions
+Transfer the parameters that it gets to the cutting functions 
+"""
+def cut_in_directions(x, y, t, width, height):
+    max_x = max(int(cut[-1]) for cut in (x, y))
+    max_y = max_x
+    
+    image_width = max_x * 2
+    image_height = max_y * 2
+    
+    scale_factor = 10#min(width, height) / max(image_width, image_height)*2
+    
+    draw_borders(x, y, t, scale_factor, width, height)
+    cuts_in_x(x, t, scale_factor, width, height)
+    cuts_in_y(y, t, scale_factor, width, height)
 
-def cut_in_directions(x, y, t):
-    cuts_in_x(x, t)
-    cuts_in_y(y, t)
-
+"""
+@function cut_draws
+Gets the sets of cuts and draws straigt cuts in a SVG
+"""
 def cut_draws(result_number, cut_group):
+    width = 1000
+    height = 1000
+    
     for i in range(len(cut_group)):
         for j in range(len(cut_group)):
             if i != j:
                 turtle.clearscreen()
                 print(cut_group[i], cut_group[j])
 
-                draw = lambda t: cut_in_directions(cut_group[i], cut_group[j], t)
-                write_file(draw, "image_{0}_{1}.svg".format(result_number, i), int(cut_group[i][-1]) *4*size_corrector, int(cut_group[j][-1]) * 4 *size_corrector)
+                draw = lambda t: cut_in_directions(cut_group[i], cut_group[j], t, width, height)
+                write_file(draw, "image_{0}_{1}.svg".format(result_number, i), width, height)
 
+
+"""
+@function write_file
+Gets a funtion to draw, a name to a SVG and it's dimensions and creates a svg file to save a draw done with the function
+"""
 def write_file(draw_func, filename, width, height):
     folder_name = create_folder()
     file_path = os.path.join(folder_name, filename)
@@ -128,8 +223,11 @@ def write_file(draw_func, filename, width, height):
     draw_func(t)
     t.save_as(file_path)
 
-# turtle stuff ends here
 
+"""
+@function makes_pretty_images
+Gets the results of the Paker, for each result organizes the input to the program that solves the cuts
+"""
 def makes_pretty_images():
     for file_name in os.listdir(directory_path):
         if file_name.startswith("result_") and file_name.endswith(".txt"):
@@ -143,37 +241,65 @@ def makes_pretty_images():
 
             print(new_lines)
 
-            for i, line_list in enumerate(new_lines):
-                if len(line_list) > 2:
-                    try:
-                        n = int(line_list[2])
-                        if line_list[3] == "Depth":
-                            for j in range(n):
-                                Dep.append(line_list[j + 6])
-                        elif line_list[3] == "Horizontal":
-                            for j in range(n):
-                                Hori.append(line_list[j + 6])
-                        elif line_list[3] == "Vertical":
-                            for j in range(n):
-                                Vert.append(line_list[j + 6])
+    for i, line_list in enumerate(new_lines):
+        if len(line_list) > 2:
+            try:
+                n = int(line_list[2])
+                if line_list[3] == "Depth":
+                    for j in range(n):
+                        Dep.append(line_list[j + 6])
+                elif line_list[3] == "Horizontal":
+                    for j in range(n):
+                        Hori.append(line_list[j + 6])
+                elif line_list[3] == "Vertical":
+                    for j in range(n):
+                        Vert.append(line_list[j + 6])
 
-                        print_vector_elements(line_list, n)
+                print_vector_elements(line_list, n)
 
-                    except ValueError:
-                        print(f"line_{i + 1}: {line_list}")
-                        print("Could not convert third element to integer.")
-                else:
-                    print(f"line_{i + 1}: {line_list}")
+            except ValueError:
+                print(f"line_{i + 1}: {line_list}")
+                print("Could not convert third element to integer.")
+        else:
+            print(f"line_{i + 1}: {line_list}")
 
-            Vert.append(new_lines[2][5])
-            Hori.append(new_lines[2][3])
-            Dep.append(new_lines[2][1])
-            print("Dep:", Dep)
-            print("Hori:", Hori)
-            print("Vert:", Vert)
-            cut_group = [Dep, Vert, Hori]
-            print(cut_group)
-            cut_draws(file_name, cut_group)
+    Vert.append(new_lines[2][5])
+    Hori.append(new_lines[2][3])
+    Dep.append(new_lines[2][1])
+    print("Dep:", Dep)
+    print("Hori:", Hori)
+    print("Vert:", Vert)
+    cut_group = [Dep, Vert, Hori]
+    print(cut_group)
+    cut_draws(file_name, cut_group)
+
+def generate_html_with_svg_files():
+    # Define the folder containing the SVG files
+    folder = ".\cuts_of_order"
+    
+    # Get a list of all the SVG files in the folder
+    svg_files = [f for f in os.listdir(folder) if f.endswith(".svg")]
+    
+    # Create the HTML document
+    html = "<html><head><title>Packing options</title></head><body>"
+    
+    # Loop through each SVG file and add it to the HTML document
+    for svg_file in svg_files:
+        # Get the name of the SVG file without the file extension
+        name = os.path.splitext(svg_file)[0]
+        
+        # Add the name of the SVG file to the HTML document
+        html += f"<h1>{name}</h1>"
+        
+        # Add the SVG file to the HTML document
+        html += f'<object type="image/svg+xml" data="{folder}/{svg_file}"></object>'
+    
+    # Close the HTML document
+    html += "</body></html>"
+    
+    # Write the HTML document to a file
+    with open("packing_options.html", "w") as f:
+        f.write(html)
 
 # File with boxes (bins) data
 print("Type the name of the file to be the input (csv) for the boxes (bins): ")
@@ -210,6 +336,7 @@ for i, b in enumerate(packer.bins):
         file.writelines([item+"\n" for item in boxes[i]])
         file.writelines([b.string()])
 
+
 print()
 print("===========  Result from processing: ")
 print()
@@ -224,7 +351,7 @@ Will call the executable external program responsible for performing the box cut
 for filename in os.listdir(path):
     filepath = os.path.join(path, filename)
     # Uses subprocess to run external cpp compiled executable program
-    output = subprocess.Popen(["teste_de_cmaismais.exe", filepath], stdout=subprocess.PIPE).communicate()[0]
+    output = subprocess.Popen(["DP3SUK.exe", filepath], stdout=subprocess.PIPE).communicate()[0]
     # print(output.decode())
     results.append(output.decode())
 
@@ -242,3 +369,4 @@ directory_path = "./cuts_results"
 
 makes_pretty_images()
 
+generate_html_with_svg_files()
